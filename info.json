@@ -1,0 +1,13 @@
+{
+    "name": "enemy-alert",
+    "version": "1.0.0",
+    "title": "Enemy Alert",
+    "description": "This mod alerts you when biters are grouping, attacking, or expanding, as well as when spawners start consuming pollution",
+    "author": "igoticecream",
+    "contact": "https://github.com/igoticecream/factorio-enemy-alert",
+    "homepage": "https://github.com/igoticecream/factorio-enemy-alert",
+    "factorio_version": "2.0",
+    "dependencies": [
+        "base >= 2.0.0"
+    ]
+}
