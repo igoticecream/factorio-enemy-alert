@@ -138,13 +138,22 @@ script.on_nth_tick(300, function(_)
                 for _, player in pairs(game.connected_players) do
                     if player.valid and player.surface == surface and player.mod_settings["enemy-alert-pollution"].value and player.is_alert_enabled(defines.alert_type.custom) then
                         local icon = icons["pollution"]
-                        local pin  = surface.create_entity({
-                            name = "pin",
-                            position = player.position,
-                            force = "neutral",
-                        })
+                        local entity = player.character
 
-                        if pin and pin.valid then
+                        if not entity then
+                            local entities = surface.find_entities_filtered { position = player.position }
+                            if #entities > 0 then
+                                entity = entities[1]
+                            else
+                                entity = surface.create_entity({
+                                    name = "pin",
+                                    position = player.position,
+                                    force = "neutral",
+                                })
+                            end
+                        end
+
+                        if entity and entity.valid then
                             -- Do not spam the player with the same alert
                             player.remove_alert({
                                 surface = surface,
@@ -152,9 +161,11 @@ script.on_nth_tick(300, function(_)
                                 icon = icon,
                             })
 
-                            player.add_custom_alert(pin, icon, { "enemy-alert.spawners-consuming-pollution", pollution_count }, false)
+                            player.add_custom_alert(entity, icon, { "enemy-alert.spawners-consuming-pollution", pollution_count }, false)
 
-                            pin.destroy()
+                            if entity.name == "pin" then
+                                entity.destroy()
+                            end
                         end
                     end
                 end
@@ -168,9 +179,9 @@ script.on_event("enemy-alert-pollution-toggle", function(event)
     local player = game.get_player(event.player_index)
 
     if player and player.valid and player.connected then
-        local status   = player.mod_settings["enemy-alert-pollution"].value
-        local enabled  = { "enemy-alert.spawners-consuming-pollution-toggle-enabled" }
-        local disabled = { "enemy-alert.spawners-consuming-pollution-toggle-disabled" }
+        local status                                 = player.mod_settings["enemy-alert-pollution"].value
+        local enabled                                = { "enemy-alert.spawners-consuming-pollution-toggle-enabled" }
+        local disabled                               = { "enemy-alert.spawners-consuming-pollution-toggle-disabled" }
 
         player.mod_settings["enemy-alert-pollution"] = {
             value = not status,
