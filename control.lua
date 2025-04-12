@@ -49,37 +49,41 @@ script.on_event(defines.events.on_unit_group_finished_gathering, function(event)
     local group = event.group
     -- Check if the group is valid and belongs to the enemy force
     if group and group.valid and group.force.name == "enemy" then
-        -- Get the group's command
-        local command = group.command
+        -- Get the group's command(s)
+        if group.command then
+            for _, command in pairs(group.command.type == defines.command.compound and group.command.commands or {group.command}) do
+                if not command.destination then
+                    break
+                end
+                
+                local surface = group.surface
+                local pin     = surface.create_entity({
+                    name = "pin",
+                    position = command.destination,
+                    force = "neutral"
+                })
 
-        if command then
-            local surface = group.surface
-            local pin     = surface.create_entity({
-                name = "pin",
-                position = command.destination,
-                force = "neutral"
-            })
+                -- Alert players
+                if pin and pin.valid then
+                    -- Notify players on the same surface
+                    for _, player in pairs(game.connected_players) do
+                        if player.valid and player.surface == surface and player.is_alert_enabled(defines.alert_type.custom) then
+                            -- Create the custom alert with the dummy entity indicating the position of the enemy group
+                            if command.type == defines.command.build_base and player.mod_settings["enemy-alert-expand"].value then
+                                player.add_custom_alert(pin, icons["warning"], { "enemy-alert.unit-group-expand", #group.members }, true)
+                            elseif command.type == defines.command.attack_area and player.mod_settings["enemy-alert-attack"].value then
+                                player.add_custom_alert(pin, icons["danger"], { "enemy-alert.unit-group-attack", #group.members }, true)
 
-            -- Alert players
-            if pin and pin.valid then
-                -- Notify players on the same surface
-                for _, player in pairs(game.connected_players) do
-                    if player.valid and player.surface == surface and player.is_alert_enabled(defines.alert_type.custom) then
-                        -- Create the custom alert with the dummy entity indicating the position of the enemy group
-                        if command.type == defines.command.build_base and player.mod_settings["enemy-alert-expand"].value then
-                            player.add_custom_alert(pin, icons["warning"], { "enemy-alert.unit-group-expand", #group.members }, true)
-                        elseif command.type == defines.command.attack_area and player.mod_settings["enemy-alert-attack"].value then
-                            player.add_custom_alert(pin, icons["danger"], { "enemy-alert.unit-group-attack", #group.members }, true)
-
-                            if player.mod_settings["enemy-alert-notification-sound"].value then
-                                player.play_sound(sounds["alert"])
+                                if player.mod_settings["enemy-alert-notification-sound"].value then
+                                    player.play_sound(sounds["alert"])
+                                end
                             end
                         end
                     end
-                end
 
-                -- Destroy pin entity
-                pin.destroy()
+                    -- Destroy pin entity
+                    pin.destroy()
+                end
             end
         end
     end
