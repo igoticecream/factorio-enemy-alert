@@ -1,6 +1,6 @@
 {
     "name": "enemy-alert",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "title": "Enemy Alert",
     "description": "This mod alerts you when biters are grouping, attacking, or expanding, as well as when spawners start consuming pollution",
     "author": "igoticecream",

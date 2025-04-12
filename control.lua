@@ -51,11 +51,11 @@ script.on_event(defines.events.on_unit_group_finished_gathering, function(event)
     if group and group.valid and group.force.name == "enemy" then
         -- Get the group's command(s)
         if group.command then
-            for _, command in pairs(group.command.type == defines.command.compound and group.command.commands or {group.command}) do
+            for _, command in pairs(group.command.type == defines.command.compound and group.command.commands or { group.command }) do
                 if not command.destination then
                     break
                 end
-                
+
                 local surface = group.surface
                 local pin     = surface.create_entity({
                     name = "pin",
